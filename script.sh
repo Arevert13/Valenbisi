@@ -12,4 +12,3 @@ echo "curl -s $API_URL -o $OUTPUT_FILE"
 sleep 5
 done
 
-
