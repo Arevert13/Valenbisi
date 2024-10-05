@@ -12,3 +12,9 @@ echo "curl -s $API_URL -o $OUTPUT_FILE"
 sleep 5
 done
 
+Historico="historico.txt"
+FECHA=$(date '+%Y-%m-%d %H:%M:%S')
+cat $OUTPUT_FILE | jq -c '.records[] | .record.fields' | while read -r estacion; do
+NOMBRE_ESTACION=$(echo $estacion | jq -r '.address')
+BICIS_DISPONIBLES=$(echo $estacion | jq -r '.available')
+echo "$FECHA, Estación: $NOMBRE_ESTACION, Bicis Disponibles: $BICIS_DISPONIBLES" >> $Historico
