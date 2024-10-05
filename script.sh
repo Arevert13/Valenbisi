@@ -4,3 +4,11 @@ API_URL="https://valencia.opendatasoft.com/api/explore/v2.1/catalog/datasets/val
 OUTPUT_FILE="data.json"
 
 curl -s $API_URL -o $OUTPUT_FILE
+
+while true
+do
+echo "curl -s $API_URL -o $OUTPUT_FILE"
+
+sleep 5
+done
+
