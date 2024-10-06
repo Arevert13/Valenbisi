@@ -2,18 +2,30 @@
 
 API_URL="https://valencia.opendatasoft.com/api/explore/v2.1/catalog/datasets/valenbisi-disponibilitat-valenbisi-dsiponibilidad/records?limit=20"
 OUTPUT_FILE="data.json"
-Historico="historico.txt"
+HISTORICAL_FILE="historico_bicis.csv"
 
-curl -s $API_URL -o $OUTPUT_FILE
+# Verifica si el archivo histórico ya existe; si no, crea el encabezado
+if [ ! -f "$HISTORICAL_FILE" ]; then
+    echo "Fecha,Estación,Disponible" > "$HISTORICAL_FILE"
+fi
 
-while true
-do
-echo "curl -s $API_URL -o $OUTPUT_FILE"
+# Función para descargar los datos y almacenar en el histórico
+obtener_datos() {
+    # Descarga los datos desde la API
+    curl -s "$API_URL" -o "$OUTPUT_FILE"
 
-FECHA=$(date '+%Y-%m-%d %H:%M:%S')
-cat $OUTPUT_FILE | jq -c '.records[] | .record.fields' | while read -r estacion; do
-NOMBRE_ESTACION=$(echo $estacion | jq -r '.address')
-BICIS_DISPONIBLES=$(echo $estacion | jq -r '.available')
-echo "$FECHA, Estación: $NOMBRE_ESTACION, Bicis Disponibles: $BICIS_DISPONIBLES" >> $Historico
-sleep 5
+    # Extrae la fecha actual
+    fecha=$(date +"%Y-%m-%d %H:%M:%S")
+
+    # Procesa el archivo JSON para obtener "Address" y "available"
+jq -r '.records[] | "\(.record.fields.address ),\(.record.fields.available // 0)"' "$OUTPUT_FILE" | while IFS="|" read -r estacion disponible; do
+        # Escribe la información en el archivo histórico
+    echo "$fecha,$estacion,$disponible" >> "$HISTORICAL_FILE"
+    done
+}
+
+# Bucle infinito que repite el proceso cada 5 segundos
+while true; do
+    obtener_datos
+    sleep 5
 done
